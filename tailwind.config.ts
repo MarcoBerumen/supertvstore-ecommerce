@@ -36,6 +36,7 @@ export default {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          soft: "hsl(var(--accent-soft))",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -56,6 +57,38 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
+      },
+      keyframes: {
+        shimmer: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+        "tile-rise": {
+          "0%": { opacity: "0", transform: "translateY(8px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "panel-pulse": {
+          "0%, 100%": { opacity: "0.85" },
+          "50%": { opacity: "1" },
+        },
+        "screen-flicker": {
+          "0%, 100%": { opacity: "1" },
+          "30%": { opacity: "0.6" },
+          "60%": { opacity: "1" },
+        },
+      },
+      animation: {
+        shimmer: "shimmer 1.6s linear infinite",
+        "tile-rise": "tile-rise 400ms var(--ease-out-quart) both",
+        "panel-pulse": "panel-pulse 4s ease-in-out infinite",
+        "screen-flicker": "screen-flicker 300ms ease-out 1",
+      },
+      transitionTimingFunction: {
+        "out-quart": "var(--ease-out-quart)",
       },
     },
   },
