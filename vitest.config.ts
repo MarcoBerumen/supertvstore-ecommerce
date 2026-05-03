@@ -14,10 +14,24 @@ const repoAlias = { "@": path.resolve(__dirname, ".") };
 // `"use cache"` + cacheLife(), which only makes sense inside a Next.js render.
 // In a plain Node test runner the real module throws; the shim lets us call
 // the query functions directly and assert against the SQL result.
-const nextCacheAlias = {
+//
+// `next/headers` is aliased to an in-memory cookie jar so the Supabase server
+// client (which `lib/supabase/cart.ts` uses) can run under Node. A fresh test
+// resets the jar via the shim's `__resetCookies()` helper.
+//
+// `server-only` throws on import outside RSC; we no-op it for integration.
+const integrationAliases = {
   "next/cache": path.resolve(
     __dirname,
     "tests/integration/__mocks__/next-cache.ts",
+  ),
+  "next/headers": path.resolve(
+    __dirname,
+    "tests/integration/__mocks__/next-headers.ts",
+  ),
+  "server-only": path.resolve(
+    __dirname,
+    "tests/integration/__mocks__/server-only.ts",
   ),
 };
 
@@ -39,7 +53,7 @@ export default defineConfig({
       },
       {
         resolve: {
-          alias: { ...repoAlias, ...nextCacheAlias },
+          alias: { ...repoAlias, ...integrationAliases },
         },
         test: {
           name: "integration",

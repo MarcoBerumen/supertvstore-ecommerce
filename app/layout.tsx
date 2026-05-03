@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
+import { Suspense } from "react";
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { CartProvider } from "@/components/cart-context";
+import { getCartItemCount } from "@/lib/supabase/cart";
 import "./globals.css";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -26,6 +31,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+async function CartShell({ children }: { children: React.ReactNode }) {
+  let initialCount = 0;
+  try {
+    initialCount = await getCartItemCount();
+  } catch {
+    // If the cart store is unreachable on initial render, render with 0 — the
+    // badge will catch up as soon as the user takes any cart action.
+    initialCount = 0;
+  }
+  return <CartProvider initialCount={initialCount}>{children}</CartProvider>;
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -42,7 +59,17 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <TooltipProvider delayDuration={300}>
+            <Suspense fallback={<CartProvider initialCount={0}>{children}</CartProvider>}>
+              <CartShell>{children}</CartShell>
+            </Suspense>
+            <Toaster
+              position="top-right"
+              richColors
+              closeButton
+              mobileOffset={{ bottom: "var(--toast-margin-bottom)" }}
+            />
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>

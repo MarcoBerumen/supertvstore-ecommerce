@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { ProductMedia } from "@/components/product-media";
 import { productImageUrl } from "@/lib/mariadb/images";
 import type { HomeProduct } from "@/lib/mariadb/queries/home";
+import { slugify } from "@/lib/mariadb/queries/product";
 
 function formatPrice(n: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -22,10 +23,11 @@ export function ProductCard({
 }) {
   const src = productImageUrl(product.imagePath);
   const accessibleName = `${product.brand ? product.brand + " " : ""}${product.name}, ${formatPrice(product.price)}`;
+  const href = `/product/${product.id}/${slugify(product.name) || "p"}`;
 
   return (
     <Link
-      href={`#product-${product.id}`}
+      href={href}
       aria-label={accessibleName}
       className="group block w-[70vw] max-w-[280px] shrink-0 snap-start sm:w-[45vw] sm:max-w-[260px] md:w-[280px] lg:w-[260px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-xl"
     >

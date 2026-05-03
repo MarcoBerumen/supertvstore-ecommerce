@@ -17,3 +17,21 @@ for (const k of required) {
     );
   }
 }
+
+// Supabase-touching tests (cart helpers, server actions) need the local stack
+// running and a service-role key for admin cleanup. These vars are *optional*
+// at the env-validation layer — tests that need them check for themselves and
+// `it.skip(...)` when the stack isn't available, so a developer can still run
+// the catalog-only integration tests without `supabase start`.
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  // eslint-disable-next-line no-console
+  console.warn(
+    "[tests] NEXT_PUBLIC_SUPABASE_URL not set — Supabase integration tests will be skipped.",
+  );
+}
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  // eslint-disable-next-line no-console
+  console.warn(
+    "[tests] SUPABASE_SERVICE_ROLE_KEY not set — anon-user cleanup will be skipped (orphan rows possible).",
+  );
+}

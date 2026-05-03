@@ -80,12 +80,17 @@ export default {
           "30%": { opacity: "0.6" },
           "60%": { opacity: "1" },
         },
+        "cart-bump": {
+          "0%, 100%": { transform: "scale(1)" },
+          "40%": { transform: "scale(1.25)" },
+        },
       },
       animation: {
         shimmer: "shimmer 1.6s linear infinite",
         "tile-rise": "tile-rise 400ms var(--ease-out-quart) both",
         "panel-pulse": "panel-pulse 4s ease-in-out infinite",
         "screen-flicker": "screen-flicker 300ms ease-out 1",
+        "cart-bump": "cart-bump 250ms var(--ease-out-quart)",
       },
       transitionTimingFunction: {
         "out-quart": "var(--ease-out-quart)",

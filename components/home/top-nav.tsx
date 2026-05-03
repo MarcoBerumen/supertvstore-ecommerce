@@ -56,7 +56,7 @@ export function TopNav({
 
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
             <NavSearch totalProducts={totalProducts} />
-            <NavCart count={0} />
+            <NavCart />
             <div className="hidden lg:block">{authButton}</div>
           </div>
         </nav>

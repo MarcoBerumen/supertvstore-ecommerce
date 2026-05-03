@@ -35,6 +35,8 @@
     --duration-fast: 150ms;
     --duration-base: 200ms;
     --duration-slow: 400ms;
+
+    --toast-margin-bottom: calc(env(safe-area-inset-bottom) + 80px);
   }
   .dark {
     --background: 0 0% 3.9%;
