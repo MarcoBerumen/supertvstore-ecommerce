@@ -13,7 +13,6 @@ import { SpecTable } from "@/components/product/spec-table";
 import { RelatedProductsRail } from "@/components/product/related-products-rail";
 import { MobileBuyBar } from "@/components/product/mobile-buy-bar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { productImageUrl } from "@/lib/mariadb/images";
 import {
   getCatalogCounts,
   type CatalogCounts,
@@ -125,8 +124,8 @@ async function ProductPageBody({ params }: RouteParams) {
     warrantiesByVariantKey[v.key] = warrantyResults[i];
   });
 
-  const galleryImages = product.imagePaths.map((p) => ({
-    src: productImageUrl(p),
+  const galleryImages = product.imageUrls.map((src) => ({
+    src,
     alt: product.name,
   }));
 

@@ -1,7 +1,7 @@
 import type { RowDataPacket } from "mysql2";
 import { cacheLife } from "next/cache";
 import { catalogPool } from "@/lib/mariadb/client";
-import { firstImagePath } from "@/lib/mariadb/images";
+import { firstImagePath, presignProductImage } from "@/lib/mariadb/images";
 
 const STORE_ID = 1;
 const PRICE_LIST_ID = 1;
@@ -22,7 +22,7 @@ export interface CategoryWithCount {
   name: string;
   slug: string;
   productCount: number;
-  sampleImagePath: string | null;
+  sampleImageUrl: string | null;
 }
 
 interface CategoryRow extends RowDataPacket {
@@ -70,13 +70,15 @@ export async function getCategoriesWithCounts(): Promise<CategoryWithCount[]> {
     STORE_ID,
   ]);
 
-  return rows.map((r) => ({
-    id: r.category_id,
-    name: r.name.trim().replace(/\s+/g, " "),
-    slug: slugify(r.name),
-    productCount: Number(r.product_count),
-    sampleImagePath: firstImagePath(r.sample_images),
-  }));
+  return Promise.all(
+    rows.map(async (r) => ({
+      id: r.category_id,
+      name: r.name.trim().replace(/\s+/g, " "),
+      slug: slugify(r.name),
+      productCount: Number(r.product_count),
+      sampleImageUrl: await presignProductImage(firstImagePath(r.sample_images)),
+    })),
+  );
 }
 
 // ---------- Top brands ----------
@@ -125,7 +127,7 @@ export interface HomeProduct {
   name: string;
   brand: string | null;
   price: number;
-  imagePath: string | null;
+  imageUrl: string | null;
 }
 
 interface HomeProductRow extends RowDataPacket {
@@ -190,13 +192,15 @@ async function fetchHomeProducts(opts: {
 
   const [rows] = await catalogPool.query<HomeProductRow[]>(sql, orderedParams);
 
-  return rows.map((r) => ({
-    id: r.product_id,
-    name: r.name.trim(),
-    brand: r.brand_name ? r.brand_name.trim() : null,
-    price: Number(r.resolved_price),
-    imagePath: firstImagePath(r.images),
-  }));
+  return Promise.all(
+    rows.map(async (r) => ({
+      id: r.product_id,
+      name: r.name.trim(),
+      brand: r.brand_name ? r.brand_name.trim() : null,
+      price: Number(r.resolved_price),
+      imageUrl: await presignProductImage(firstImagePath(r.images)),
+    })),
+  );
 }
 
 export function getNewArrivals(limit = 12): Promise<HomeProduct[]> {

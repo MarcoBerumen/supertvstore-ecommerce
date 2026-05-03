@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ProductMedia } from "@/components/product-media";
-import { productImageUrl } from "@/lib/mariadb/images";
 import { iconForCategory } from "./category-icons";
 import type { CategoryWithCount } from "@/lib/mariadb/queries/home";
 
@@ -12,7 +11,7 @@ export function CategoryTile({
   index: number;
 }) {
   const Icon = iconForCategory(category.name);
-  const src = productImageUrl(category.sampleImagePath);
+  const src = category.sampleImageUrl;
   const stagger = Math.min(index, 12) * 40;
 
   return (

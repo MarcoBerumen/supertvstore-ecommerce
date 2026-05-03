@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProductMedia } from "@/components/product-media";
-import { productImageUrl } from "@/lib/mariadb/images";
 import type { HomeProduct } from "@/lib/mariadb/queries/home";
 import { slugify } from "@/lib/mariadb/queries/product";
 
@@ -21,7 +20,7 @@ export function ProductCard({
   product: HomeProduct;
   showNewBadge?: boolean;
 }) {
-  const src = productImageUrl(product.imagePath);
+  const src = product.imageUrl;
   const accessibleName = `${product.brand ? product.brand + " " : ""}${product.name}, ${formatPrice(product.price)}`;
   const href = `/product/${product.id}/${slugify(product.name) || "p"}`;
 

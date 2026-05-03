@@ -1,5 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { firstImagePath, productImageUrl } from "@/lib/mariadb/images";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import {
+  firstImagePath,
+  presignProductImage,
+  presignProductImages,
+} from "@/lib/mariadb/images";
 
 describe("firstImagePath", () => {
   it("returns the first segment of a comma-separated string", () => {
@@ -31,18 +35,41 @@ describe("firstImagePath", () => {
   });
 });
 
-describe("productImageUrl", () => {
-  // Regression pin: today this returns null for everything so the placeholder
-  // gradient renders. When a CDN base URL is wired in, this test will fail
-  // and force the implementer to update both the function and this test.
-  it("returns null for any non-empty path (CDN not yet configured)", () => {
-    expect(productImageUrl("foo.jpg")).toBeNull();
-    expect(productImageUrl("nested/path/foo.jpg")).toBeNull();
+describe("presignProductImage", () => {
+  const ORIGINAL = { ...process.env };
+
+  beforeAll(() => {
+    process.env.AWS_S3_BUCKET = "supertvstoreapp";
+    process.env.AWS_S3_REGION = "us-west-1";
+    process.env.AWS_ACCESS_KEY_ID = "AKIATEST";
+    process.env.AWS_SECRET_ACCESS_KEY = "secrettest";
   });
 
-  it("returns null for null/undefined/empty", () => {
-    expect(productImageUrl(null)).toBeNull();
-    expect(productImageUrl(undefined)).toBeNull();
-    expect(productImageUrl("")).toBeNull();
+  afterAll(() => {
+    process.env = ORIGINAL;
+  });
+
+  it("returns null for null/undefined/empty input", async () => {
+    expect(await presignProductImage(null)).toBeNull();
+    expect(await presignProductImage(undefined)).toBeNull();
+    expect(await presignProductImage("")).toBeNull();
+  });
+
+  it("returns a signed URL on the configured bucket host with the given key", async () => {
+    const url = await presignProductImage("products/foo.jpg");
+    expect(url).not.toBeNull();
+    expect(url).toMatch(
+      /^https:\/\/supertvstoreapp\.s3\.us-west-1\.amazonaws\.com\/products\/foo\.jpg\?/,
+    );
+    // SigV4 marker — proves we actually signed the request rather than
+    // returning a bare URL.
+    expect(url).toContain("X-Amz-Signature=");
+  });
+
+  it("presignProductImages drops nulls and preserves order for valid keys", async () => {
+    const urls = await presignProductImages(["a.jpg", "b.jpg"]);
+    expect(urls).toHaveLength(2);
+    expect(urls[0]).toMatch(/\/a\.jpg\?/);
+    expect(urls[1]).toMatch(/\/b\.jpg\?/);
   });
 });

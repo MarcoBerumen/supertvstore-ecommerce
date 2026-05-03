@@ -1,7 +1,11 @@
 import type { RowDataPacket } from "mysql2";
 import { cacheLife } from "next/cache";
 import { catalogPool } from "@/lib/mariadb/client";
-import { firstImagePath } from "@/lib/mariadb/images";
+import {
+  firstImagePath,
+  presignProductImage,
+  presignProductImages,
+} from "@/lib/mariadb/images";
 
 const STORE_ID = 1;
 const PRICE_LIST_ID = 1;
@@ -36,7 +40,7 @@ export interface ProductDetail {
   categoryName: string | null;
   year: number | null;
   screenSize: number | null;
-  imagePaths: string[];
+  imageUrls: string[];
   basePrice: number | null;
   specs: SpecRow[];
 }
@@ -166,7 +170,7 @@ export async function getProductDetail(
     categoryName: row.category_name ? row.category_name.trim().replace(/\s+/g, " ") : null,
     year: row.year,
     screenSize: row.screen_size === null ? null : Number(row.screen_size),
-    imagePaths: parseImages(row.images),
+    imageUrls: await presignProductImages(parseImages(row.images)),
     basePrice: row.base_price === null ? null : Number(row.base_price),
     specs: parseSpecs(row.features, master),
   };
@@ -296,7 +300,7 @@ export interface RelatedProduct {
   name: string;
   brand: string | null;
   price: number;
-  imagePath: string | null;
+  imageUrl: string | null;
 }
 
 interface RelatedRow extends RowDataPacket {
@@ -361,13 +365,15 @@ async function fetchRelated(opts: {
   `;
 
   const [rows] = await catalogPool.query<RelatedRow[]>(sql, params);
-  return rows.map((r) => ({
-    id: r.product_id,
-    name: r.name.trim(),
-    brand: r.brand_name ? r.brand_name.trim() : null,
-    price: Number(r.resolved_price),
-    imagePath: firstImagePath(r.images),
-  }));
+  return Promise.all(
+    rows.map(async (r) => ({
+      id: r.product_id,
+      name: r.name.trim(),
+      brand: r.brand_name ? r.brand_name.trim() : null,
+      price: Number(r.resolved_price),
+      imageUrl: await presignProductImage(firstImagePath(r.images)),
+    })),
+  );
 }
 
 export async function getRelatedProducts(
